@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { siteConfig, defaultSEO } from "@/config/site";
 import { Header, Footer } from "@/components/layout";
+import { AppProviders } from "@/providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,11 +30,13 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className={`${inter.className} antialiased`}>
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-grow">{children}</main>
-          <Footer />
-        </div>
+        <AppProviders>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow">{children}</main>
+            <Footer />
+          </div>
+        </AppProviders>
       </body>
     </html>
   );

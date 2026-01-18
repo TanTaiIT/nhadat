@@ -3,9 +3,13 @@ import { body } from 'express-validator';
 import {
   register,
   login,
+  logout,
   getMe,
   updateDetails,
   updatePassword,
+  refreshAccessToken,
+  forgotPassword,
+  resetPassword,
 } from '../controllers/auth.controller';
 import { protect } from '../middlewares/auth';
 import { validate } from '../middlewares/validate';
@@ -37,9 +41,26 @@ const updatePasswordValidation = [
     .withMessage('Mật khẩu mới phải có ít nhất 6 ký tự'),
 ];
 
-// Routes
+const forgotPasswordValidation = [
+  body('email').isEmail().withMessage('Email không hợp lệ'),
+];
+
+const resetPasswordValidation = [
+  body('token').notEmpty().withMessage('Token không được để trống'),
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Mật khẩu phải có ít nhất 6 ký tự'),
+];
+
+// Public routes
 router.post('/register', registerValidation, validate, register);
 router.post('/login', loginValidation, validate, login);
+router.post('/refresh', refreshAccessToken);
+router.post('/forgot-password', forgotPasswordValidation, validate, forgotPassword);
+router.put('/reset-password', resetPasswordValidation, validate, resetPassword);
+
+// Protected routes (require authentication)
+router.post('/logout', protect, logout);
 router.get('/me', protect, getMe);
 router.put('/updatedetails', protect, updateDetails);
 router.put('/updatepassword', protect, updatePasswordValidation, validate, updatePassword);

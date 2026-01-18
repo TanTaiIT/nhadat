@@ -1,15 +1,39 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NAV_ITEMS, ROUTES } from '@/constants';
 import { Button } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { useCurrentUser, useLogout } from '@/hooks/queries';
+import { useAppSelector } from '@/store';
+import { selectUser, selectIsAuthenticated } from '@/store/slices/authSlice';
 
 export function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  
+  // Get user from Redux store
+  const user = useAppSelector(selectUser);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  
+  // Fetch current user on mount
+  const { data: currentUser } = useCurrentUser();
+  const logout = useLogout();
+
+  // Update user if fetched from API
+  useEffect(() => {
+    if (currentUser && !user) {
+      // User will be set by the query hook
+    }
+  }, [currentUser, user]);
+
+  const handleLogout = () => {
+    setIsUserMenuOpen(false);
+    logout.mutate();
+  };
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -43,17 +67,86 @@ export function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
-            <Link href={ROUTES.LOGIN}>
-              <Button variant="ghost">Đăng nhập</Button>
-            </Link>
-            <Link href={ROUTES.POST_PROPERTY}>
-              <Button variant="primary">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Đăng tin
-              </Button>
-            </Link>
+            {isAuthenticated && user ? (
+              <>
+                <Link href={ROUTES.POST_PROPERTY}>
+                  <Button variant="primary">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Đăng tin
+                  </Button>
+                </Link>
+                
+                {/* User Menu */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm font-medium">
+                        {user.profile?.firstName?.[0] || user.email[0].toUpperCase()}
+                      </span>
+                    </div>
+                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {/* Dropdown Menu */}
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 border border-gray-200 z-50">
+                      <div className="px-4 py-3 border-b border-gray-200">
+                        <p className="text-sm font-medium text-gray-900">{user.profile?.fullName || user.email}</p>
+                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                      </div>
+                      <Link href={ROUTES.DASHBOARD} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsUserMenuOpen(false)}>
+                        Tổng quan
+                      </Link>
+                      <Link href={ROUTES.MY_PROPERTIES} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsUserMenuOpen(false)}>
+                        Quản lý tin
+                      </Link>
+                      <Link href={ROUTES.FAVORITES} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsUserMenuOpen(false)}>
+                        Yêu thích
+                      </Link>
+                      <Link href={ROUTES.PROFILE} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsUserMenuOpen(false)}>
+                        Tài khoản
+                      </Link>
+                      <Link href={ROUTES.SETTINGS} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsUserMenuOpen(false)}>
+                        Cài đặt
+                      </Link>
+                      <div className="border-t border-gray-200 mt-2 pt-2">
+                        <button
+                          onClick={handleLogout}
+                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                          disabled={logout.isPending}
+                        >
+                          {logout.isPending ? 'Đang đăng xuất...' : 'Đăng xuất'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <Link href={ROUTES.LOGIN}>
+                  <Button variant="ghost">Đăng nhập</Button>
+                </Link>
+                <Link href={ROUTES.REGISTER}>
+                  <Button variant="outline">Đăng ký</Button>
+                </Link>
+                <Link href={ROUTES.POST_PROPERTY}>
+                  <Button variant="primary">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Đăng tin
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -89,12 +182,48 @@ export function Header() {
                 </Link>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-gray-200">
-                <Link href={ROUTES.LOGIN} onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full">Đăng nhập</Button>
-                </Link>
-                <Link href={ROUTES.POST_PROPERTY} onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="primary" className="w-full">Đăng tin</Button>
-                </Link>
+                {isAuthenticated && user ? (
+                  <>
+                    <div className="px-2 py-3 bg-gray-50 rounded-lg mb-2">
+                      <p className="text-sm font-medium text-gray-900">{user.profile?.fullName || user.email}</p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                    </div>
+                    <Link href={ROUTES.DASHBOARD} onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">Tổng quan</Button>
+                    </Link>
+                    <Link href={ROUTES.MY_PROPERTIES} onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">Quản lý tin</Button>
+                    </Link>
+                    <Link href={ROUTES.FAVORITES} onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">Yêu thích</Button>
+                    </Link>
+                    <Link href={ROUTES.POST_PROPERTY} onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="primary" className="w-full">Đăng tin</Button>
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full mt-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg text-left"
+                      disabled={logout.isPending}
+                    >
+                      {logout.isPending ? 'Đang đăng xuất...' : 'Đăng xuất'}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link href={ROUTES.LOGIN} onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full">Đăng nhập</Button>
+                    </Link>
+                    <Link href={ROUTES.REGISTER} onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full">Đăng ký</Button>
+                    </Link>
+                    <Link href={ROUTES.POST_PROPERTY} onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="primary" className="w-full">Đăng tin</Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </nav>
           </div>

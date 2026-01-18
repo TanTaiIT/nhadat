@@ -66,8 +66,8 @@ const mockProperties: Property[] = [
       amenities: ['parking', 'garden', 'balcony'],
     },
     media: {
-      images: ['/public/batdongsan.jpg'],
-      thumbnail: '/public/batdongsan.jpg',
+      images: ['/batdongsan.jpg'],
+      thumbnail: '/batdongsan.jpg',
     },
     owner: {
       id: '2',
@@ -97,8 +97,8 @@ const mockProperties: Property[] = [
     },
     features: {},
     media: {
-      images: ['/public/batdongsan.jpg'],
-      thumbnail: '/placeholder-property.jpg',
+      images: ['/batdongsan.jpg'],
+      thumbnail: '/batdongsan.jpg',
     },
     owner: {
       id: '3',
@@ -135,8 +135,8 @@ const mockProperties: Property[] = [
       amenities: ['pool', 'garden', 'parking', 'security'],
     },
     media: {
-      images: ['/public/batdongsan.jpg'],
-      thumbnail: '/placeholder-property.jpg',
+      images: ['/batdongsan.jpg'],
+      thumbnail: '/batdongsan.jpg',
     },
     owner: {
       id: '4',
@@ -172,8 +172,8 @@ const mockProperties: Property[] = [
       amenities: ['elevator', 'ac', 'water-heater'],
     },
     media: {
-      images: ['/public/batdongsan.jpg'],
-      thumbnail: '/placeholder-property.jpg',
+      images: ['/batdongsan.jpg'],
+      thumbnail: '/batdongsan.jpg',
     },
     owner: {
       id: '5',
@@ -210,8 +210,8 @@ const mockProperties: Property[] = [
       amenities: ['parking', 'balcony'],
     },
     media: {
-      images: ['/public/batdongsan.jpg'],
-      thumbnail: '/placeholder-property.jpg',
+      images: ['/batdongsan.jpg'],
+      thumbnail: '/batdongsan.jpg',
     },
     owner: {
       id: '6',
@@ -247,8 +247,8 @@ const mockProperties: Property[] = [
       amenities: ['elevator', 'pool', 'gym', 'security', 'playground'],
     },
     media: {
-      images: ['/public/batdongsan.jpg'],
-      thumbnail: '/placeholder-property.jpg',
+      images: ['/batdongsan.jpg'],
+      thumbnail: '/batdongsan.jpg',
     },
     owner: {
       id: '7',
@@ -278,8 +278,8 @@ const mockProperties: Property[] = [
     },
     features: {},
     media: {
-      images: ['/public/batdongsan.jpg'],
-      thumbnail: '/placeholder-property.jpg',
+      images: ['/batdongsan.jpg'],
+      thumbnail: '/batdongsan.jpg',
     },
     owner: {
       id: '8',

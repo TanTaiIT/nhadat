@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Property } from '@/types';
 import { PropertyCard } from '@/components/properties/PropertyCard';
@@ -8,7 +10,18 @@ interface FeaturedPropertiesProps {
   properties: Property[];
 }
 
+const INITIAL_DISPLAY_COUNT = 8;
+
 export function FeaturedProperties({ properties }: FeaturedPropertiesProps) {
+  const [displayCount, setDisplayCount] = useState(INITIAL_DISPLAY_COUNT);
+  
+  const hasMore = properties.length > displayCount;
+  const displayedProperties = properties.slice(0, displayCount);
+  
+  const handleShowMore = () => {
+    setDisplayCount(prev => Math.min(prev + 8, properties.length));
+  };
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -37,22 +50,40 @@ export function FeaturedProperties({ properties }: FeaturedPropertiesProps) {
         {properties.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {properties.map((property) => (
+              {displayedProperties.map((property) => (
                 <PropertyCard key={property.id} property={property} />
               ))}
             </div>
 
-            {/* Mobile View All Button */}
-            <div className="mt-8 text-center md:hidden">
-              <Link href="/bat-dong-san">
-                <Button variant="outline" className="w-full" >
-                  Xem tất cả
+            {/* Show More Button */}
+            {hasMore && (
+              <div className="mt-8 text-center">
+                <Button 
+                  variant="outline" 
+                  onClick={handleShowMore}
+                  className="px-8"
+                >
+                  Xem thêm ({properties.length - displayCount} bất động sản)
                   <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </Button>
-              </Link>
-            </div>
+              </div>
+            )}
+
+            {/* Mobile View All Button */}
+            {!hasMore && (
+              <div className="mt-8 text-center md:hidden">
+                <Link href="/bat-dong-san">
+                  <Button variant="outline" className="w-full" >
+                    Xem tất cả
+                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Button>
+                </Link>
+              </div>
+            )}
           </>
         ) : (
           <div className="text-center py-16">
