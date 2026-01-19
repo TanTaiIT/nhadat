@@ -30,7 +30,7 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'combined')); // Logging
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).json({
     success: true,
     message: 'Server is running',

@@ -31,9 +31,9 @@ export const protect = async (
       const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
 
       // Get user from token
-      req.user = await User.findById(decoded.id);
+      const user = await User.findById(decoded.id);
 
-      if (!req.user) {
+      if (!user) {
         res.status(401).json({
           success: false,
           message: 'Người dùng không tồn tại',
@@ -41,6 +41,7 @@ export const protect = async (
         return;
       }
 
+      req.user = user;
       next();
     } catch (error) {
       res.status(401).json({

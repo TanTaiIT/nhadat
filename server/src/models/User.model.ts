@@ -32,18 +32,102 @@ const UserSchema = new Schema<IUserDocument>(
       type: String,
       match: [/^[0-9]{10,11}$/, 'Số điện thoại không hợp lệ'],
     },
+    zaloNumber: {
+      type: String,
+    },
     avatar: {
       type: String,
       default: 'https://via.placeholder.com/150',
+    },
+    address: {
+      street: String,
+      ward: String,
+      district: String,
+      city: String,
+    },
+    bio: {
+      type: String,
+      maxlength: [500, 'Giới thiệu không được quá 500 ký tự'],
     },
     role: {
       type: String,
       enum: ['user', 'agent', 'admin'],
       default: 'user',
     },
+    // Thông tin cho Agent/Môi giới
+    agentInfo: {
+      companyName: String,
+      businessLicense: String,
+      taxCode: String,
+      website: String,
+      yearsOfExperience: {
+        type: Number,
+        min: 0,
+      },
+      specializations: [String], // Chuyên về loại BĐS nào
+      serviceAreas: [String], // Khu vực phục vụ
+    },
+    // Xác thực thông tin
+    verification: {
+      isEmailVerified: {
+        type: Boolean,
+        default: false,
+      },
+      isPhoneVerified: {
+        type: Boolean,
+        default: false,
+      },
+      isIdentityVerified: {
+        type: Boolean,
+        default: false,
+      },
+      identityDocument: String, // CCCD/CMND
+      identityDocumentImages: [String],
+      verifiedAt: Date,
+      verifiedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    },
+    // Thống kê
+    statistics: {
+      totalProperties: {
+        type: Number,
+        default: 0,
+      },
+      totalViews: {
+        type: Number,
+        default: 0,
+      },
+      totalContacts: {
+        type: Number,
+        default: 0,
+      },
+      successfulDeals: {
+        type: Number,
+        default: 0,
+      },
+      rating: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5,
+      },
+      reviewCount: {
+        type: Number,
+        default: 0,
+      },
+    },
     isVerified: {
       type: Boolean,
       default: false,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    lastLoginAt: {
+      type: Date,
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
@@ -73,20 +157,26 @@ UserSchema.methods.comparePassword = async function (
 
 // Generate JWT Token
 UserSchema.methods.getSignedJwtToken = function (): string {
+  const secret = process.env.JWT_SECRET || 'default-secret';
+  const expiresIn = process.env.JWT_EXPIRE || '7d';
+  
   return jwt.sign(
-    { id: this._id, email: this.email, role: this.role },
-    process.env.JWT_SECRET as string,
-    { expiresIn: process.env.JWT_EXPIRE || '7d' }
-  );
+    { id: this._id.toString(), email: this.email, role: this.role },
+    secret,
+    { expiresIn } as jwt.SignOptions
+  ) as string;
 };
 
 // Generate Refresh Token
 UserSchema.methods.getRefreshToken = function (): string {
+  const secret = process.env.JWT_REFRESH_SECRET || 'default-refresh-secret';
+  const expiresIn = process.env.JWT_REFRESH_EXPIRE || '30d';
+  
   return jwt.sign(
-    { id: this._id },
-    process.env.JWT_REFRESH_SECRET as string,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d' }
-  );
+    { id: this._id.toString() },
+    secret,
+    { expiresIn } as jwt.SignOptions
+  ) as string;
 };
 
 // Virtual for user's properties
@@ -96,5 +186,27 @@ UserSchema.virtual('properties', {
   foreignField: 'owner',
   justOne: false,
 });
+
+// Virtual for user's favorites
+UserSchema.virtual('favorites', {
+  ref: 'Favorite',
+  localField: '_id',
+  foreignField: 'user',
+  justOne: false,
+});
+
+// Virtual for user's subscriptions
+UserSchema.virtual('subscriptions', {
+  ref: 'Subscription',
+  localField: '_id',
+  foreignField: 'user',
+  justOne: false,
+});
+
+// Indexes
+UserSchema.index({ role: 1, isActive: 1 });
+UserSchema.index({ 'address.city': 1, 'address.district': 1 });
+UserSchema.index({ 'verification.isIdentityVerified': 1 });
+UserSchema.index({ 'statistics.rating': -1 });
 
 export default mongoose.model<IUserDocument>('User', UserSchema);

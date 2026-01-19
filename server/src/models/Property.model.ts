@@ -48,13 +48,26 @@ const PropertySchema = new Schema<IPropertyDocument>(
     },
     type: {
       type: String,
-      enum: ['apartment', 'house', 'land', 'villa', 'office'],
+      enum: ['apartment', 'house', 'land', 'villa', 'office', 'commercial', 'room'],
       required: [true, 'Vui lòng chọn loại bất động sản'],
+    },
+    listingType: {
+      type: String,
+      enum: ['sale', 'rent'],
+      required: [true, 'Vui lòng chọn loại giao dịch'],
     },
     status: {
       type: String,
-      enum: ['available', 'sold', 'rented', 'pending'],
+      enum: ['available', 'sold', 'rented', 'pending', 'expired'],
       default: 'available',
+    },
+    priceNegotiable: {
+      type: Boolean,
+      default: false,
+    },
+    direction: {
+      type: String,
+      enum: ['east', 'west', 'south', 'north', 'northeast', 'northwest', 'southeast', 'southwest'],
     },
     features: {
       bedrooms: {
@@ -86,6 +99,10 @@ const PropertySchema = new Schema<IPropertyDocument>(
         type: Boolean,
         default: false,
       },
+      frontWidth: {
+        type: Number,
+        min: 0,
+      },
     },
     images: {
       type: [String],
@@ -94,6 +111,22 @@ const PropertySchema = new Schema<IPropertyDocument>(
           return v.length >= 1;
         },
         message: 'Phải có ít nhất 1 hình ảnh',
+      },
+    },
+    videoUrl: {
+      type: String,
+    },
+    contactInfo: {
+      phoneNumber: {
+        type: String,
+        required: true,
+      },
+      zaloNumber: {
+        type: String,
+      },
+      showPhoneNumber: {
+        type: Boolean,
+        default: true,
       },
     },
     owner: {
@@ -109,6 +142,23 @@ const PropertySchema = new Schema<IPropertyDocument>(
       type: Boolean,
       default: true,
     },
+    priority: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 10,
+    },
+    expiresAt: {
+      type: Date,
+    },
+    verifiedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -120,8 +170,15 @@ const PropertySchema = new Schema<IPropertyDocument>(
 // Create indexes for better query performance
 PropertySchema.index({ title: 'text', description: 'text' });
 PropertySchema.index({ 'address.city': 1, 'address.district': 1 });
-PropertySchema.index({ type: 1, status: 1 });
+PropertySchema.index({ type: 1, status: 1, listingType: 1 });
 PropertySchema.index({ price: 1 });
+PropertySchema.index({ area: 1 });
 PropertySchema.index({ createdAt: -1 });
+PropertySchema.index({ priority: -1, createdAt: -1 });
+PropertySchema.index({ owner: 1, isActive: 1 });
+PropertySchema.index({ direction: 1 });
+PropertySchema.index({ 'features.bedrooms': 1 });
+PropertySchema.index({ expiresAt: 1 });
+PropertySchema.index({ isActive: 1, isVerified: 1 });
 
 export default mongoose.model<IPropertyDocument>('Property', PropertySchema);

@@ -12,11 +12,10 @@ import { ROUTES } from '@/constants';
 import { loginSchema, type LoginInput } from '@/lib/validations';
 
 interface LoginFormProps {
-  redirectUrl?: string;
   isAdmin?: boolean;
 }
 
-export function LoginForm({ redirectUrl, isAdmin = false }: LoginFormProps) {
+export function LoginForm({ isAdmin = false }: LoginFormProps) {
   const login = useLogin();
   const isLoading = useAppSelector(selectIsLoading);
   const error = useAppSelector(selectError);
@@ -26,7 +25,8 @@ export function LoginForm({ redirectUrl, isAdmin = false }: LoginFormProps) {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
-    resolver: yupResolver(loginSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: yupResolver(loginSchema) as any,
     defaultValues: {
       email: '',
       password: '',
@@ -36,17 +36,17 @@ export function LoginForm({ redirectUrl, isAdmin = false }: LoginFormProps) {
 
   console.log('error', errors)
 
-  const onSubmit = async (data: LoginInput) => {
+  const onSubmit = handleSubmit(async (data: LoginInput) => {
     try {
       await login.mutateAsync(data);
     } catch (err) {
       // Error handled by React Query
       console.error('Login error:', err);
     }
-  };
+  });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={onSubmit} className="space-y-6">
       {/* Global Error Message */}
       {error && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg">

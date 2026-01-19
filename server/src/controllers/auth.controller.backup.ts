@@ -246,7 +246,7 @@ export const updatePassword = async (
 // @route   POST /api/v1/auth/logout
 // @access  Private
 export const logout = async (
-  req: AuthRequest,
+  _req: AuthRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {

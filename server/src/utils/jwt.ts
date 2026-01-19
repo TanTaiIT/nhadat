@@ -17,8 +17,8 @@ export const generateAccessToken = (payload: TokenPayload): string => {
   return jwt.sign(
     payload,
     process.env.JWT_SECRET as string,
-    { expiresIn: process.env.JWT_EXPIRE || '7d' }
-  );
+    { expiresIn: process.env.JWT_EXPIRE || '7d' } as jwt.SignOptions
+  ) as string;
 };
 
 /**
@@ -28,8 +28,8 @@ export const generateRefreshToken = (payload: RefreshTokenPayload): string => {
   return jwt.sign(
     payload,
     process.env.JWT_REFRESH_SECRET as string,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d' }
-  );
+    { expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d' } as jwt.SignOptions
+  ) as string;
 };
 
 /**

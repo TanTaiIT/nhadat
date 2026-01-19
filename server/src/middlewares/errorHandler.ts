@@ -14,9 +14,9 @@ export class ErrorResponse extends Error {
 // Error handler middleware
 export const errorHandler = (
   err: any,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   let error = { ...err };
   error.message = err.message;
