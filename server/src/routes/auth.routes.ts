@@ -4,8 +4,6 @@ import {
   register,
   login,
   logout,
-  getMe,
-  updateDetails,
   updatePassword,
   refreshAccessToken,
   forgotPassword,
@@ -61,8 +59,6 @@ router.put('/reset-password', resetPasswordValidation, validate, resetPassword);
 
 // Protected routes (require authentication)
 router.post('/logout', protect, logout);
-router.get('/me', protect, getMe);
-router.put('/updatedetails', protect, updateDetails);
 router.put('/updatepassword', protect, updatePasswordValidation, validate, updatePassword);
 
 export default router;

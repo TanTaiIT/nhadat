@@ -58,6 +58,7 @@ export interface IUser {
 }
 
 export interface IUserDocument extends IUser, Document {
+  id: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
   getSignedJwtToken(): string;
   getRefreshToken(): string;

@@ -34,8 +34,6 @@ export function LoginForm({ isAdmin = false }: LoginFormProps) {
     },
   });
 
-  console.log('error', errors)
-
   const onSubmit = handleSubmit(async (data: LoginInput) => {
     try {
       await login.mutateAsync(data);

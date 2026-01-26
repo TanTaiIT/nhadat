@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NAV_ITEMS, ROUTES } from '@/constants';
@@ -15,20 +15,13 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   
-  // Get user from Redux store
+  // Get user from Redux store (synced by useCurrentUser hook)
   const user = useAppSelector(selectUser);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   
-  // Fetch current user on mount
-  const { data: currentUser } = useCurrentUser();
+  // Fetch current user on mount - this will sync to Redux automatically
+  const { isLoading: isLoadingUser } = useCurrentUser();
   const logout = useLogout();
-
-  // Update user if fetched from API
-  useEffect(() => {
-    if (currentUser && !user) {
-      // User will be set by the query hook
-    }
-  }, [currentUser, user]);
 
   const handleLogout = () => {
     setIsUserMenuOpen(false);

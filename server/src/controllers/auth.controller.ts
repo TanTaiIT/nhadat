@@ -148,56 +148,6 @@ export const login = async (
   }
 };
 
-// @desc    Get current logged in user
-// @route   GET /api/v1/auth/me
-// @access  Private
-export const getMe = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const user = await User.findById(req.user?.id);
-
-    res.status(200).json({
-      success: true,
-      data: user,
-    } as ApiResponse);
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Update user details
-// @route   PUT /api/v1/auth/updatedetails
-// @access  Private
-export const updateDetails = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const fieldsToUpdate = {
-      name: req.body.name,
-      email: req.body.email,
-      phone: req.body.phone,
-    };
-
-    const user = await User.findByIdAndUpdate(req.user?.id, fieldsToUpdate, {
-      new: true,
-      runValidators: true,
-    });
-
-    res.status(200).json({
-      success: true,
-      message: 'Cập nhật thông tin thành công',
-      data: user,
-    } as ApiResponse);
-  } catch (error) {
-    next(error);
-  }
-};
-
 // @desc    Update password
 // @route   PUT /api/v1/auth/updatepassword
 // @access  Private

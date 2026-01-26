@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authService } from '@/services/auth.service';
 import { useAppDispatch } from '@/store';
 import { setCredentials, logout as logoutAction, setLoading, setError } from '@/store/slices/authSlice';
-import type { LoginCredentials, RegisterData } from '@/types';
+import type { LoginCredentials, RegisterData, User } from '@/types';
 import { ROUTES } from '@/constants';
 
 // Query Keys
@@ -16,18 +16,34 @@ export const authKeys = {
 
 /**
  * Hook to get current user
+ * Syncs with Redux store on successful fetch
  */
 export function useCurrentUser() {
   const dispatch = useAppDispatch();
   
   return useQuery({
     queryKey: authKeys.me(),
-    queryFn: async () => {
+    queryFn: async (): Promise<User | null> => {
       try {
         if (!authService.isAuthenticated()) {
           return null;
         }
-        const user = await authService.getCurrentUser();
+        const user = await authService.getCurrentUser() as User;
+        
+        // Sync with Redux store
+        if (user) {
+          const accessToken = authService.getAccessToken();
+          const refreshToken = typeof window !== 'undefined' 
+            ? localStorage.getItem('refreshToken') 
+            : null;
+          
+          dispatch(setCredentials({
+            user: user,
+            accessToken: accessToken || '',
+            refreshToken: refreshToken || '',
+          }));
+        }
+        
         return user;
       } catch (error) {
         // If token is invalid, logout
@@ -38,6 +54,7 @@ export function useCurrentUser() {
     },
     enabled: authService.isAuthenticated(),
     retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes - avoid refetching too often
   });
 }
 

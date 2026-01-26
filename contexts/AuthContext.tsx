@@ -35,7 +35,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         if (authService.isAuthenticated()) {
           const currentUser = await authService.getCurrentUser();
-          setUser(currentUser);
+          setUser(currentUser as User);
         }
       } catch (err) {
         console.error('Auth initialization error:', err);

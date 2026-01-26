@@ -19,7 +19,7 @@ export const ROUTES = {
   RESET_PASSWORD: '/dat-lai-mat-khau',
   
   // Protected routes
-  DASHBOARD: '/dashboard',
+  DASHBOARD: '/',
   POST_PROPERTY: '/dang-tin',
   EDIT_PROPERTY: (id: string) => `/dang-tin/${id}/chinh-sua`,
   MY_PROPERTIES: '/quan-ly-tin',
@@ -32,14 +32,14 @@ export const ROUTES = {
 export const API_ROUTES = {
   // Auth endpoints
   AUTH: {
-    LOGIN: '/api/auth/login',
-    REGISTER: '/api/auth/register',
-    LOGOUT: '/api/auth/logout',
-    REFRESH: '/api/auth/refresh',
-    FORGOT_PASSWORD: '/api/auth/forgot-password',
-    RESET_PASSWORD: '/api/auth/reset-password',
-    VERIFY_EMAIL: '/api/auth/verify-email',
-    ME: '/api/auth/me',
+    LOGIN: '/api/v1/auth/login',
+    REGISTER: '/api/v1/auth/register',
+    LOGOUT: '/api/v1/auth/logout',
+    REFRESH: '/api/v1/auth/refresh',
+    FORGOT_PASSWORD: '/api/v1/auth/forgot-password',
+    RESET_PASSWORD: '/api/v1/auth/reset-password',
+    VERIFY_EMAIL: '/api/v1/auth/verify-email',
+    ME: '/api/v1/users/me', // Endpoint ở user routes, không phải auth routes
   },
   
   // Property endpoints

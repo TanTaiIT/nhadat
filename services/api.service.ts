@@ -1,13 +1,45 @@
-// Example: API Service
+// API Service with automatic token handling
 import type { ApiResponse } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 class ApiService {
   private baseURL: string;
 
   constructor(baseURL: string) {
     this.baseURL = baseURL;
+  }
+
+  /**
+   * Get access token from localStorage
+   */
+  private getAccessToken(): string | null {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('accessToken');
+    }
+    return null;
+  }
+
+  /**
+   * Build headers with optional Authorization
+   */
+  private buildHeaders(customHeaders?: HeadersInit): HeadersInit {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Auto-attach token if available
+    const token = this.getAccessToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // Merge custom headers
+    if (customHeaders) {
+      Object.assign(headers, customHeaders);
+    }
+
+    return headers;
   }
 
   private async request<T>(
@@ -17,10 +49,7 @@ class ApiService {
     try {
       const response = await fetch(`${this.baseURL}${endpoint}`, {
         ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          ...options?.headers,
-        },
+        headers: this.buildHeaders(options?.headers as Record<string, string>),
       });
 
       const data = await response.json();

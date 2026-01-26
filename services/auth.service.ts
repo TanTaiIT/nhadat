@@ -3,6 +3,27 @@ import { apiService } from './api.service';
 import { API_ROUTES } from '@/constants';
 import type { LoginCredentials, RegisterData, AuthResponse } from '@/types';
 
+// Cookie utilities
+const setCookie = (name: string, value: string, days: number = 7) => {
+  if (typeof document === 'undefined') return;
+  const expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+};
+
+const getCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+};
+
+const deleteCookie = (name: string) => {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+};
+
 class AuthService {
   /**
    * Login user
@@ -60,13 +81,10 @@ class AuthService {
 
   /**
    * Get current user
+   * Token is automatically attached by apiService
    */
   async getCurrentUser() {
-    const response = await apiService.get(API_ROUTES.AUTH.ME, {
-      headers: {
-        Authorization: `Bearer ${this.getAccessToken()}`,
-      },
-    });
+    const response = await apiService.get(API_ROUTES.AUTH.ME);
     
     if (response.success && response.data) {
       return response.data;
@@ -125,38 +143,50 @@ class AuthService {
     }
   }
 
-  // Token management
+  // Token management - stores in both localStorage and cookies
   private setTokens(accessToken: string, refreshToken: string): void {
     if (typeof window !== 'undefined') {
+      // Store in localStorage for client-side access
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
+      
+      // Store in cookies for middleware/server-side access
+      setCookie('accessToken', accessToken, 7); // 7 days
+      setCookie('refreshToken', refreshToken, 30); // 30 days
     }
   }
 
   private setAccessToken(accessToken: string): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem('accessToken', accessToken);
+      setCookie('accessToken', accessToken, 7);
     }
   }
 
   getAccessToken(): string | null {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('accessToken');
+      // Try localStorage first, then cookies
+      return localStorage.getItem('accessToken') || getCookie('accessToken');
     }
     return null;
   }
 
   private getRefreshToken(): string | null {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('refreshToken');
+      return localStorage.getItem('refreshToken') || getCookie('refreshToken');
     }
     return null;
   }
 
   private clearTokens(): void {
     if (typeof window !== 'undefined') {
+      // Clear from localStorage
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      
+      // Clear from cookies
+      deleteCookie('accessToken');
+      deleteCookie('refreshToken');
     }
   }
 
